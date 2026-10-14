@@ -64,9 +64,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
     @ExceptionHandler(FotoInvalidaException.class)
-    public ResponseEntity<String> handFotoInvalida(FotoInvalidaException ex){
+    public ResponseEntity<String> handleFotoInvalida(FotoInvalidaException ex){
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+    @ExceptionHandler(TarefaNaoEncontradaException.class)
+    public ResponseEntity<String> handleTarefaNaoEncontrada(TarefaNaoEncontradaException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
 

@@ -4,16 +4,18 @@ import com.namassacompany.petVersoRestFull.dto.TarefaCadastroDTO;
 import com.namassacompany.petVersoRestFull.dto.TarefaResponseDTO;
 import com.namassacompany.petVersoRestFull.exception.AcessoNegadoException;
 import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
+import com.namassacompany.petVersoRestFull.exception.TarefaNaoEncontradaException;
 import com.namassacompany.petVersoRestFull.model.*;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
 import com.namassacompany.petVersoRestFull.repository.TarefaRepository;
 import com.namassacompany.petVersoRestFull.repository.VinculoPetRepository;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Service
 public class TarefaService {
@@ -28,11 +30,11 @@ public class TarefaService {
     }
 
     @Transactional
-    public TarefaResponseDTO criar (Long idPet, TarefaCadastroDTO dto, Usuario usuario){
-        Pet pet = petRepository.findById(idPet).orElseThrow(()->new PetNaoEncontradoException("Pet nao encontrado"));
-        VinculoPet vinculo = buscarVinculoAceito(pet, usuario);
-        if (vinculo.getPapel() != Papel.DONO){
-             throw new AcessoNegadoException("voce nao tem permissao para realizar esta acao");
+    public TarefaResponseDTO criar(Long idPet, TarefaCadastroDTO dto, Usuario usuario) {
+        Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
+        VinculoPet vinculo = buscarVinculoAceito(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
+        if (vinculo.getPapel() != Papel.DONO) {
+            throw new AcessoNegadoException("voce nao tem permissao para realizar esta acao");
         }
         Tarefa tarefa = new Tarefa(
                 pet,
@@ -47,27 +49,38 @@ public class TarefaService {
     }
 
     @Transactional(readOnly = true)
-    public List<TarefaResponseDTO>listarTarefas( Long idPet, Usuario usuario){
-        Pet pet = petRepository.findById(idPet).orElseThrow(()->new PetNaoEncontradoException("Pet nao encontrado"));
-         buscarVinculoAceito(pet, usuario);
-         List<Tarefa> tarefas = tarefaRepository.findByPetIdPetOrderByDataTarefaAscHoraAsc(idPet);
-         return tarefas.stream().map(TarefaResponseDTO::new).toList();
+    public List<TarefaResponseDTO> listarTarefas(Long idPet, Usuario usuario) {
+        Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
+        buscarVinculoAceito(pet, usuario, () -> new TarefaNaoEncontradaException("Pet nao encontrado"));
+        List<Tarefa> tarefas = tarefaRepository.findByPetIdPetOrderByDataTarefaAscHoraAsc(idPet);
+        return tarefas.stream().map(TarefaResponseDTO::new).toList();
     }
+
     @Transactional(readOnly = true)
-    public List<TarefaResponseDTO> listarPorDia(LocalDate data, Usuario usuario){
+    public List<TarefaResponseDTO> listarPorDia(LocalDate data, Usuario usuario) {
         List<Tarefa> tarefas = tarefaRepository.listarDoDia(usuario, StatusDeVinculo.ACEITO, data);
         return tarefas.stream().map(TarefaResponseDTO::new).toList();
     }
 
+    @Transactional
+    public TarefaResponseDTO concluirTarefa(Long idTarefa, Usuario usuario) {
+        Tarefa tarefa = tarefaRepository.findById(idTarefa).orElseThrow(() -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+        buscarVinculoAceito(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+        if (tarefa.isConcluida()) {
+            throw new IllegalStateException("Tarefa já concluida");
+        }
+        tarefa.setConcluida(true);
+        tarefa.setExecutadoPor(usuario);
+        tarefa.setDataConclusao(LocalDateTime.now());
+
+        return new TarefaResponseDTO(tarefa);
+    }
 
 
-
-
-
-    private VinculoPet buscarVinculoAceito(Pet pet, Usuario usuario) {
-        VinculoPet vinculo =  vinculoPetRepository.findByPetAndUsuario(pet, usuario).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
-        if (vinculo.getStatus()!= StatusDeVinculo.ACEITO){
-            throw new PetNaoEncontradoException("Pet nao encontrado");
+    private VinculoPet buscarVinculoAceito(Pet pet, Usuario usuario, Supplier<? extends RuntimeException> erro) {
+        VinculoPet vinculo = vinculoPetRepository.findByPetAndUsuario(pet, usuario).orElseThrow(erro);
+        if (vinculo.getStatus() != StatusDeVinculo.ACEITO) {
+            throw erro.get();
         }
         return vinculo;
     }

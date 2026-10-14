@@ -42,4 +42,12 @@ public class TarefaController {
 
     }
 
+    @PatchMapping("/tarefas/{idTarefa}/concluir")
+    public ResponseEntity<TarefaResponseDTO> concluirTarefa(
+            @PathVariable Long idTarefa,
+            @AuthenticationPrincipal Usuario usuario
+    ){
+        return ResponseEntity.ok(tarefaService.concluirTarefa(idTarefa, usuario));
+    }
+
 }

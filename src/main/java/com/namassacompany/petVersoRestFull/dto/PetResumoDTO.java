@@ -1,6 +1,5 @@
 package com.namassacompany.petVersoRestFull.dto;
 
-import com.namassacompany.petVersoRestFull.model.Papel;
 import com.namassacompany.petVersoRestFull.model.VinculoPet;
 
 import java.util.Base64;
