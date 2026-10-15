@@ -32,10 +32,7 @@ public class TarefaService {
     @Transactional
     public TarefaResponseDTO criar(Long idPet, TarefaCadastroDTO dto, Usuario usuario) {
         Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
-        VinculoPet vinculo = buscarVinculoAceito(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
-        if (vinculo.getPapel() != Papel.DONO) {
-            throw new AcessoNegadoException("voce nao tem permissao para realizar esta acao");
-        }
+        buscarVinculoAceito(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
         Tarefa tarefa = new Tarefa(
                 pet,
                 dto.titulo(),
