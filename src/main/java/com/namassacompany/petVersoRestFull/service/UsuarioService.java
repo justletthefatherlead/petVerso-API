@@ -68,7 +68,7 @@ public class UsuarioService {
         return new UsuarioPerfilDTO(usuariosalvo);
     }
 
-    public UsuarioPerfilDTO vizualizarPefil(Usuario usuario){
+    public UsuarioPerfilDTO vizualizarPerfil(Usuario usuario){
         return new UsuarioPerfilDTO(usuario);
     }
 
