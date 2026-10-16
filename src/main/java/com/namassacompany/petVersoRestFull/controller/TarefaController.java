@@ -61,4 +61,14 @@ public class TarefaController {
         return ResponseEntity.ok(tarefaService.concluirTarefa(idTarefa, usuario));
     }
 
+    @PutMapping("/tarefas/{idTarefa}")
+    public ResponseEntity<TarefaResponseDTO> atualizarTarefa(
+            @PathVariable Long idTarefa,
+            @Valid @RequestBody TarefaCadastroDTO dto,
+            @AuthenticationPrincipal Usuario usuario
+    ){
+        return ResponseEntity.ok(tarefaService.atualizarTarefa(idTarefa,dto, usuario));
+
+    }
+
 }

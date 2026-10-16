@@ -73,6 +73,23 @@ public class TarefaService {
         return new TarefaResponseDTO(tarefa);
     }
 
+    @Transactional
+    public TarefaResponseDTO atualizarTarefa(Long idTarefa, TarefaCadastroDTO dto, Usuario usuario) {
+        Tarefa tarefa = tarefaRepository.findById(idTarefa).orElseThrow(() -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+        VinculoPet vinculo = buscarVinculoAceito(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+
+        if (vinculo.getPapel() != Papel.DONO) throw new AcessoNegadoException("Voce nao tem permissao para realizar esta ação");
+
+        if (tarefa.isConcluida()) throw new IllegalStateException("Esta tarefa já foi concluida");
+
+        tarefa.setTitulo(dto.titulo());
+        tarefa.setDescricao(dto.descricao());
+        tarefa.setDataTarefa(dto.dataTarefa());
+        tarefa.setHora(dto.hora());
+
+        return new TarefaResponseDTO(tarefa);
+    }
+
 
     private VinculoPet buscarVinculoAceito(Pet pet, Usuario usuario, Supplier<? extends RuntimeException> erro) {
         VinculoPet vinculo = vinculoPetRepository.findByPetAndUsuario(pet, usuario).orElseThrow(erro);
