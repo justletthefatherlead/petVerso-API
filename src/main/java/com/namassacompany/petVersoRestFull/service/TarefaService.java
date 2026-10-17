@@ -20,19 +20,19 @@ import java.util.function.Supplier;
 @Service
 public class TarefaService {
     private final PetRepository petRepository;
-    private final VinculoPetRepository vinculoPetRepository;
+    private final VinculoAcessoService vinculoAcessoService;
     private final TarefaRepository tarefaRepository;
 
-    public TarefaService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository, TarefaRepository tarefaRepository) {
+    public TarefaService(PetRepository petRepository, VinculoAcessoService vinculoAcessoService, TarefaRepository tarefaRepository) {
         this.petRepository = petRepository;
-        this.vinculoPetRepository = vinculoPetRepository;
+        this.vinculoAcessoService = vinculoAcessoService;
         this.tarefaRepository = tarefaRepository;
     }
 
     @Transactional
     public TarefaResponseDTO criar(Long idPet, TarefaCadastroDTO dto, Usuario usuario) {
         Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
-        buscarVinculoAceito(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
+        vinculoAcessoService.buscarVinculoAceito(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
         Tarefa tarefa = new Tarefa(
                 pet,
                 dto.titulo(),
@@ -48,7 +48,7 @@ public class TarefaService {
     @Transactional(readOnly = true)
     public List<TarefaResponseDTO> listarTarefas(Long idPet, Usuario usuario) {
         Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
-        buscarVinculoAceito(pet, usuario, () -> new TarefaNaoEncontradaException("Pet nao encontrado"));
+        vinculoAcessoService.buscarVinculoAceito(pet, usuario, () -> new TarefaNaoEncontradaException("Pet nao encontrado"));
         List<Tarefa> tarefas = tarefaRepository.findByPetIdPetOrderByDataTarefaAscHoraAsc(idPet);
         return tarefas.stream().map(TarefaResponseDTO::new).toList();
     }
@@ -62,7 +62,7 @@ public class TarefaService {
     @Transactional
     public TarefaResponseDTO concluirTarefa(Long idTarefa, Usuario usuario) {
         Tarefa tarefa = tarefaRepository.findById(idTarefa).orElseThrow(() -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
-        buscarVinculoAceito(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+        vinculoAcessoService.buscarVinculoAceito(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
         if (tarefa.isConcluida()) {
             throw new IllegalStateException("Tarefa já concluida");
         }
@@ -76,9 +76,7 @@ public class TarefaService {
     @Transactional
     public TarefaResponseDTO atualizarTarefa(Long idTarefa, TarefaCadastroDTO dto, Usuario usuario) {
         Tarefa tarefa = tarefaRepository.findById(idTarefa).orElseThrow(() -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
-        VinculoPet vinculo = buscarVinculoAceito(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
-
-        if (vinculo.getPapel() != Papel.DONO) throw new AcessoNegadoException("Voce nao tem permissao para realizar esta ação");
+        vinculoAcessoService.buscarVinculoDono(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
 
         if (tarefa.isConcluida()) throw new IllegalStateException("Esta tarefa já foi concluida");
 
@@ -91,11 +89,5 @@ public class TarefaService {
     }
 
 
-    private VinculoPet buscarVinculoAceito(Pet pet, Usuario usuario, Supplier<? extends RuntimeException> erro) {
-        VinculoPet vinculo = vinculoPetRepository.findByPetAndUsuario(pet, usuario).orElseThrow(erro);
-        if (vinculo.getStatus() != StatusDeVinculo.ACEITO) {
-            throw erro.get();
-        }
-        return vinculo;
-    }
+
 }
