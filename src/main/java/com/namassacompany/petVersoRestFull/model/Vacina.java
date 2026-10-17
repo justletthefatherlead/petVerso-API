@@ -52,6 +52,8 @@ public class Vacina {
         return Objects.hashCode(idVacina);
     }
 
+    public Long getIdVacina(){ return idVacina; }
+
     public Pet getPet() {
         return pet;
     }
