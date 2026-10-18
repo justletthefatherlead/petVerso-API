@@ -75,5 +75,18 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
+    @ExceptionHandler(VacinaNaoEncontradaException.class)
+    public ResponseEntity<String> handleVacinaNaoEncontrada(VacinaNaoEncontradaException ex){
+        return  ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+    @ExceptionHandler(DadosInvalidosException.class)
+    public ResponseEntity<String> handleDadosInvalidos(DadosInvalidosException ex){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
 
 }
