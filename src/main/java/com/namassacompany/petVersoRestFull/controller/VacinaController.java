@@ -24,8 +24,7 @@ public class VacinaController {
     @PostMapping("/pets/{idPet}/vacinas")
     public ResponseEntity<VacinaResponseDTO> cadastrar(@PathVariable Long idPet,
                                                        @Valid @RequestBody VacinaRequestDTO dto,
-                                                       @AuthenticationPrincipal Usuario usuario)
-    {
+                                                       @AuthenticationPrincipal Usuario usuario) {
         VacinaResponseDTO vacina = vacinaService.cadastrar(idPet, dto, usuario);
         return ResponseEntity.status(HttpStatus.CREATED).body(vacina);
     }
@@ -34,10 +33,17 @@ public class VacinaController {
     public ResponseEntity<List<VacinaResponseDTO>> listar(
             @PathVariable Long idPet,
             @AuthenticationPrincipal Usuario usuario
-    )
-    {
+    ) {
         List<VacinaResponseDTO> vacinas = vacinaService.listar(idPet, usuario);
 
         return ResponseEntity.ok(vacinas);
+    }
+
+    @PutMapping("/vacinas/{idVacina}")
+    public ResponseEntity<VacinaResponseDTO> atualizar(@PathVariable Long idVacina,
+                                                       @Valid @RequestBody VacinaRequestDTO dto,
+                                                       @AuthenticationPrincipal Usuario usuario) {
+        VacinaResponseDTO vacinaAtuzaliada = vacinaService.atualizar(idVacina, dto, usuario);
+        return ResponseEntity.ok().body(vacinaAtuzaliada);
     }
 }

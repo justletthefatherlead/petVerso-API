@@ -4,6 +4,7 @@ import com.namassacompany.petVersoRestFull.dto.VacinaRequestDTO;
 import com.namassacompany.petVersoRestFull.dto.VacinaResponseDTO;
 import com.namassacompany.petVersoRestFull.exception.DadosInvalidosException;
 import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
+import com.namassacompany.petVersoRestFull.exception.VacinaNaoEncontradaException;
 import com.namassacompany.petVersoRestFull.model.Pet;
 import com.namassacompany.petVersoRestFull.model.Usuario;
 import com.namassacompany.petVersoRestFull.model.Vacina;
@@ -53,6 +54,20 @@ public class VacinaService {
                 .stream()
                 .map(VacinaResponseDTO::new).toList();
 
+
+    }
+
+    @Transactional
+    public VacinaResponseDTO atualizar(Long idVacina, VacinaRequestDTO dto, Usuario usuario) {
+        Vacina vacina = vacinaRepository.findById(idVacina).orElseThrow(() -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
+        vinculoAcessoService.buscarVinculoDono(vacina.getPet(), usuario, () -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
+        validarDatas(dto);
+        vacina.setNome(dto.nome());
+        vacina.setDataAplicacao(dto.dataAplicacao());
+        vacina.setDataProximaDose(dto.dataProximaDose());
+        vacina.setObservacao(dto.observacao());
+
+        return new VacinaResponseDTO(vacina);
 
     }
 
