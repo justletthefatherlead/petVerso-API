@@ -18,27 +18,77 @@ public class Vacina {
     @Column(nullable = false, name = "nome")
     private String nome;
 
-    @Column(name = "dataAplicacao", nullable = false)
+    @Column(name = "dataAplicacao")
     private LocalDate dataAplicacao;
 
-    @Column(name = "dataProximaDose")
+    @Column
+    private boolean dosagemUnica;
+
+    @Column
+    private Integer intervaloQuantidade;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private IntervaloUnidade intervaloUnidade;
+
+    @Column
     private LocalDate dataProximaDose;
 
     @Column(name = "observacao", length = 500)
     private String observacao;
 
-   protected Vacina(){
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StatusVacina status;
 
-   }
-    public Vacina(Pet pet, String nome, LocalDate dataAplicacao, LocalDate dataProximaDose, String observacao) {
+
+    protected Vacina() {
+
+    }
+
+    public StatusVacina getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusVacina status) {
+        this.status = status;
+    }
+
+    public IntervaloUnidade getIntervaloUnidade() {
+        return intervaloUnidade;
+    }
+
+    public void setIntervaloUnidade(IntervaloUnidade intervaloUnidade) {
+        this.intervaloUnidade = intervaloUnidade;
+    }
+
+    public Integer getIntervaloQuantidade() {
+        return intervaloQuantidade;
+    }
+
+    public void setIntervaloQuantidade(Integer intervaloQuantidade) {
+        this.intervaloQuantidade = intervaloQuantidade;
+    }
+
+    public boolean isDosagemUnica() {
+        return dosagemUnica;
+    }
+
+    public void setDosagemUnica(boolean dosagemUnica) {
+        this.dosagemUnica = dosagemUnica;
+    }
+
+    public Vacina( Pet pet, String nome, LocalDate dataAplicacao, boolean dosagemUnica, Integer intervaloQuantidade, IntervaloUnidade intervaloUnidade, LocalDate dataProximaDose, String observacao, StatusVacina status) {
         this.pet = pet;
         this.nome = nome;
         this.dataAplicacao = dataAplicacao;
+        this.dosagemUnica = dosagemUnica;
+        this.intervaloQuantidade = intervaloQuantidade;
+        this.intervaloUnidade = intervaloUnidade;
         this.dataProximaDose = dataProximaDose;
         this.observacao = observacao;
+        this.status = status;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
@@ -52,7 +102,9 @@ public class Vacina {
         return Objects.hashCode(idVacina);
     }
 
-    public Long getIdVacina(){ return idVacina; }
+    public Long getIdVacina() {
+        return idVacina;
+    }
 
     public Pet getPet() {
         return pet;
