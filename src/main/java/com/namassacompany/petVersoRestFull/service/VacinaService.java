@@ -6,6 +6,7 @@ import com.namassacompany.petVersoRestFull.exception.DadosInvalidosException;
 import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
 import com.namassacompany.petVersoRestFull.exception.VacinaNaoEncontradaException;
 import com.namassacompany.petVersoRestFull.model.Pet;
+import com.namassacompany.petVersoRestFull.model.StatusVacina;
 import com.namassacompany.petVersoRestFull.model.Usuario;
 import com.namassacompany.petVersoRestFull.model.Vacina;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
@@ -38,9 +39,12 @@ public class VacinaService {
                 pet,
                 dto.nome(),
                 dto.dataAplicacao(),
+                false,
+                null,
+                null,
                 dto.dataProximaDose(),
-                dto.observacao()
-
+                dto.observacao(),
+                StatusVacina.PENDENTE
         );
         return new VacinaResponseDTO(vacinaRepository.save(vacina));
     }
