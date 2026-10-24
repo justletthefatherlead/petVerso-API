@@ -1,5 +1,5 @@
 package com.namassacompany.petVersoRestFull.controller;
-import com.namassacompany.petVersoRestFull.dto.LoginDTO;
+import com.namassacompany.petVersoRestFull.dto.LoginRequestDTO;
 import com.namassacompany.petVersoRestFull.dto.TokenResponseDTO;
 import com.namassacompany.petVersoRestFull.service.AuthService;
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ public class AuthController {
         this.authService = authService;
     }
         @PostMapping("/api/login")
-    public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginDTO dto){
+    public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto){
     TokenResponseDTO novoLogin = authService.login(dto);
     return ResponseEntity.status(HttpStatus.OK).body(novoLogin);
 }

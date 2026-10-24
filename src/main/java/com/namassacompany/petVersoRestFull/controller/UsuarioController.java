@@ -21,24 +21,24 @@ public class UsuarioController {
     }
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<UsuarioCadastroResponseDTO> cadastrar(@Valid @RequestBody UsuarioCadastroDTO usuario) {
+    public ResponseEntity<UsuarioCadastroResponseDTO> cadastrar(@Valid @RequestBody UsuarioRequestDTO usuario) {
         UsuarioCadastroResponseDTO novoUsuario = usuarioService.cadastrar(usuario);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(novoUsuario);
     }
 
     @GetMapping("/perfil")
-    public ResponseEntity<UsuarioPerfilDTO> perfilUsuario(@AuthenticationPrincipal Usuario usuario) {
+    public ResponseEntity<UsuarioPerfilResponseDTO> perfilUsuario(@AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.ok(usuarioService.vizualizarPerfil(usuario));
 
     }
 
     @PutMapping("/atualizarPerfil")
-    public ResponseEntity<UsuarioPerfilDTO> atualizarPerfil(
-            @RequestBody AtualizarPerfilDTO atUsario,
+    public ResponseEntity<UsuarioPerfilResponseDTO> atualizarPerfil(
+            @RequestBody UsuarioPerfilRequestDTO atUsario,
             @AuthenticationPrincipal Usuario usuario
     ) {
-        UsuarioPerfilDTO perfilAtualizado = usuarioService.atualizarPerfil(atUsario, usuario);
+        UsuarioPerfilResponseDTO perfilAtualizado = usuarioService.atualizarPerfil(atUsario, usuario);
         return ResponseEntity.ok(perfilAtualizado);
 
 

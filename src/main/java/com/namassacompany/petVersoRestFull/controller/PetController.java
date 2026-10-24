@@ -21,54 +21,54 @@ public class PetController {
 
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<PetCadastroResponseDTO> cadastrar(@RequestBody PetCadastroDTO petDto, @AuthenticationPrincipal Usuario usuario) {
-        PetCadastroResponseDTO petCadastrado = petService.cadastrar(petDto, usuario);
+    public ResponseEntity<PetResponseDTO> cadastrar(@RequestBody PetRequestDTO petDto, @AuthenticationPrincipal Usuario usuario) {
+        PetResponseDTO petCadastrado = petService.cadastrar(petDto, usuario);
         return ResponseEntity.ok(petCadastrado);
     }
 
     @GetMapping("/{id}/perfil")
-    public ResponseEntity<PetPerfilDTO> visualizarPetPerfil(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
-        PetPerfilDTO visualizarPetPerfil = petService.visualizarPetPerfil(id, usuario);
+    public ResponseEntity<PetPerfilResponseDTO> visualizarPetPerfil(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        PetPerfilResponseDTO visualizarPetPerfil = petService.visualizarPetPerfil(id, usuario);
         return ResponseEntity.ok(visualizarPetPerfil);
     }
 
     @PutMapping("/{id}/atualizarPetPerfil")
-    public ResponseEntity<PetPerfilDTO> addPerfilSensiAndPersonalit(@PathVariable Long id, @RequestBody AtualizarPetDTO pdto, @AuthenticationPrincipal Usuario usuario) {
-        PetPerfilDTO atualizarPetPerfil = petService.addPerfilSensiAndPersonalit(id, pdto, usuario);
+    public ResponseEntity<PetPerfilResponseDTO> addPerfilSensiAndPersonalit(@PathVariable Long id, @RequestBody PetPerfilRequestDTO pdto, @AuthenticationPrincipal Usuario usuario) {
+        PetPerfilResponseDTO atualizarPetPerfil = petService.addPerfilSensiAndPersonalit(id, pdto, usuario);
         return ResponseEntity.ok(atualizarPetPerfil);
     }
 
     @PostMapping("/solicitarVinculo")
-    public ResponseEntity<SolicitarVinculoResponseDTO> solicitarVinculo(@Valid @RequestBody SolicitarVinculoDTO dto, @AuthenticationPrincipal Usuario usuario) {
-        SolicitarVinculoResponseDTO solicitacao = petService.solicitarVinculo(usuario, dto);
+    public ResponseEntity<VinculoResponseDTO> solicitarVinculo(@Valid @RequestBody VinculoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        VinculoResponseDTO solicitacao = petService.solicitarVinculo(usuario, dto);
         return ResponseEntity.ok(solicitacao);
     }
 
     @GetMapping("/listarSolicitacoes")
-    public ResponseEntity<List<SolicitacaoPendenteDTO>> solicitacoesPendentes(@AuthenticationPrincipal Usuario usuario) {
-        List<SolicitacaoPendenteDTO> pendentes = petService.listarSolicitacoes(usuario);
+    public ResponseEntity<List<SolicitacaoResponseDTO>> solicitacoesPendentes(@AuthenticationPrincipal Usuario usuario) {
+        List<SolicitacaoResponseDTO> pendentes = petService.listarSolicitacoes(usuario);
         return ResponseEntity.ok(pendentes);
 
 
     }
 
     @PostMapping("/processarSolicitacao")
-    public ResponseEntity<SolicitarVinculoResponseDTO> processarSolicitacao(@Valid @RequestBody ProcessarSolicitacaoDTO dto, @AuthenticationPrincipal Usuario usuario) {
-        SolicitarVinculoResponseDTO resposta = petService.processarSolicitacao(dto.idSolicitacao(), dto.novoStatus(), usuario);
+    public ResponseEntity<VinculoResponseDTO> processarSolicitacao(@Valid @RequestBody ProcessarSolicitacaoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        VinculoResponseDTO resposta = petService.processarSolicitacao(dto.idSolicitacao(), dto.novoStatus(), usuario);
 
         return ResponseEntity.ok(resposta);
 
     }
 
     @GetMapping("/meusPets")
-    public ResponseEntity<List<PetResumoDTO>> listarPets(@AuthenticationPrincipal Usuario usuario) {
-        List<PetResumoDTO> pets = petService.listarPets(usuario);
+    public ResponseEntity<List<PetResumoResponseDTO>> listarPets(@AuthenticationPrincipal Usuario usuario) {
+        List<PetResumoResponseDTO> pets = petService.listarPets(usuario);
         return ResponseEntity.ok(pets);
     }
 
     @PutMapping("/{id}/foto")
-    public ResponseEntity<AtualizarFotoPetDTO> atualizarFotoPet(@PathVariable Long id, @RequestBody AtualizarFotoPetDTO dto, @AuthenticationPrincipal Usuario usuario) {
-        AtualizarFotoPetDTO atualizarFotoPetDTO = petService.atualizarFotoPet(id, usuario, dto);
-        return ResponseEntity.ok(atualizarFotoPetDTO);
+    public ResponseEntity<PetFotoRequestDTO> atualizarFotoPet(@PathVariable Long id, @RequestBody PetFotoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        PetFotoRequestDTO petFotoRequestDTO = petService.atualizarFotoPet(id, usuario, dto);
+        return ResponseEntity.ok(petFotoRequestDTO);
     }
 }

@@ -1,6 +1,6 @@
 package com.namassacompany.petVersoRestFull.controller;
 
-import com.namassacompany.petVersoRestFull.dto.TarefaCadastroDTO;
+import com.namassacompany.petVersoRestFull.dto.TarefaRequestDTO;
 import com.namassacompany.petVersoRestFull.dto.TarefaResponseDTO;
 import com.namassacompany.petVersoRestFull.model.Usuario;
 import com.namassacompany.petVersoRestFull.service.TarefaService;
@@ -25,7 +25,7 @@ public class TarefaController {
 
     @PostMapping("/pets/{id}/tarefas")
     public ResponseEntity<TarefaResponseDTO> criar(
-            @Valid @RequestBody TarefaCadastroDTO dto,
+            @Valid @RequestBody TarefaRequestDTO dto,
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuario
     ) {
@@ -64,7 +64,7 @@ public class TarefaController {
     @PutMapping("/tarefas/{idTarefa}")
     public ResponseEntity<TarefaResponseDTO> atualizarTarefa(
             @PathVariable Long idTarefa,
-            @Valid @RequestBody TarefaCadastroDTO dto,
+            @Valid @RequestBody TarefaRequestDTO dto,
             @AuthenticationPrincipal Usuario usuario
     ){
         return ResponseEntity.ok(tarefaService.atualizarTarefa(idTarefa,dto, usuario));
