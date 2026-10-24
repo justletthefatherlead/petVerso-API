@@ -4,13 +4,13 @@ import com.namassacompany.petVersoRestFull.model.VinculoPet;
 
 import java.util.Base64;
 
-public record PetResumoDTO(
+public record PetResumoResponseDTO(
         Long idPet,
         String nome,
         String papel,
         String fotoPetBase64
 ) {
-    public PetResumoDTO(VinculoPet vinculo){
+    public PetResumoResponseDTO(VinculoPet vinculo){
         this(vinculo.getPet().getIdPet(),
              vinculo.getPet().getNome(),
              vinculo.getPapel().name(),

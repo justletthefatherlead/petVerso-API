@@ -6,7 +6,7 @@ import com.namassacompany.petVersoRestFull.model.Sexo;
 
 import java.time.LocalDate;
 
-public record PetCadastroResponseDTO(
+public record PetResponseDTO(
         Long id,
         String nome,
         String raca,
@@ -17,7 +17,7 @@ public record PetCadastroResponseDTO(
         Sexo sexo,
         String codigoVinculo
 ) {
-    public PetCadastroResponseDTO(Pet pet){
+    public PetResponseDTO(Pet pet){
         this(pet.getIdPet(), pet.getNome(), pet.getRaca(), pet.getEspecie(),pet.getDataDeNascimento(), pet.getPorte(), pet.getPeso(), pet.getSexo(),
                 pet.getCodigoVinculo());
     }

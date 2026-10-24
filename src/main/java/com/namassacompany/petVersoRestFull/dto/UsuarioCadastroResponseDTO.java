@@ -5,4 +5,4 @@ public record UsuarioCadastroResponseDTO(
         String nomeDeUsuario,
         String email,
         String token
-){ }
+) {}

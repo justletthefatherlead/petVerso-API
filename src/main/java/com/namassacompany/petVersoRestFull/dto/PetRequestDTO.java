@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record PetCadastroDTO(
+public record PetRequestDTO(
         String fotoBase64,
         @NotBlank(message = "o campo nome é obrigatório") String nome,
         @NotBlank(message = "o campo raca é obrigatório") String raca,

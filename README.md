@@ -36,9 +36,12 @@ Projeto desenvolvido como TCC. O aplicativo Android é desenvolvido separadament
 - Conclusão de tarefa por qualquer usuário com vínculo aceito, registrando quem executou e quando
 
 **Vacinas**
-- Registro de vacinas do pet com nome, data de aplicação, data da próxima dose e observação (somente o dono)
+- Registro de vacinas do pet com nome, dose única (sim/não), intervalo de revacinação (quantidade + unidade) e observação (somente o dono)
+- A vacina nasce como `PENDENTE`, podendo ser agendada antes de ser aplicada
+- Marcar a vacina como aplicada (qualquer usuário com vínculo aceito): a data de aplicação passa a ser o dia de hoje e a data da próxima dose é calculada a partir do intervalo
+- Status da vacina: `PENDENTE`, `APLICADA` ou `ATRASADA` (esta última é derivada na resposta e nunca gravada no banco)
 - Listagem das vacinas do pet, da aplicação mais recente para a mais antiga
-- Alteração de uma vacina (somente o dono)
+- Alteração de uma vacina (somente o dono), recalculando a próxima dose quando a vacina já foi aplicada e não é dose única
 
 ---
 
@@ -77,10 +80,13 @@ Principais decisões:
 
 - **DTOs em vez de entidades** na entrada e na saída, evitando mass assignment e vazamento de dados.
 - **Fotos como Base64 no JSON** (sem multipart) e armazenadas como `MEDIUMBLOB`. O DTO leve (listagens) não leva foto; o DTO de perfil leva.
-- **Enums** (`Papel`, `StatusDeVinculo`, `Porte`, `Sexo`) gravados como `String` no banco.
+- **Enums** (`Papel`, `StatusDeVinculo`, `Porte`, `Sexo`, `StatusVacina`, `IntervaloUnidade`) gravados como `String` no banco.
 - **Controle de acesso mascarado**: quem não tem vínculo aceito com um recurso recebe o mesmo `404` de um recurso inexistente, sem revelar que ele existe.
 - **Verificação de vínculo centralizada**: o `VinculoAcessoService` concentra a regra "vínculo aceito" e "papel de dono", usada pelos services de tarefas e vacinas. Cada recurso informa a exceção a lançar, para que o `404` mascarado fale do seu próprio recurso.
-- **Alterações completas (`PUT`)**: tarefas e vacinas são atualizadas reenviando todos os campos; a hora da tarefa e a próxima dose da vacina vazias significam "sem valor".
+- **Alterações completas (`PUT`)**: tarefas e vacinas são atualizadas reenviando todos os campos; a hora da tarefa vazia significa "sem hora".
+- **Próxima dose calculada pelo servidor**: a vacina guarda o intervalo (quantidade + unidade) e o service calcula a `dataProximaDose` ao marcar como aplicada ou ao alterar uma vacina já aplicada; o cliente nunca envia essa data.
+- **Status da vacina derivado**: o banco guarda só `PENDENTE` e `APLICADA`; `ATRASADA` é calculada ao montar o DTO de resposta (campo `statusVacina`), sem alterar a entidade.
+- **Fuso horário explícito**: datas "de hoje" usam `America/Sao_Paulo` em cada `now()`, independentemente do fuso do servidor.
 
 ### Modelo de dados (resumo)
 
@@ -97,7 +103,7 @@ Usuario ──< VinculoPet >── Pet ──< Tarefa
 - **VinculoPet**: relação muitos-para-muitos entre usuário e pet, com papel, status e data de criação
 - **Sessao**: token de sessão de cada login
 - **Tarefa**: título, descrição, data, hora, concluída, quem executou, data de conclusão
-- **Vacina**: nome, data de aplicação, data da próxima dose (opcional), observação (opcional, até 500 caracteres)
+- **Vacina**: nome, data de aplicação (opcional, preenchida ao aplicar), dose única, intervalo de revacinação (quantidade + unidade), data da próxima dose (calculada), status (`PENDENTE` ou `APLICADA`), observação (opcional, até 500 caracteres)
 
 ---
 
@@ -124,6 +130,7 @@ Rotas públicas: `POST /api/usuarios/cadastrar` e `POST /api/login`. Todo o rest
 | Alterar tarefa | ✅ | ❌ (403) | ❌ (404) |
 | Ver vacinas do pet | ✅ | ✅ | ❌ (404) |
 | Registrar e alterar vacina | ✅ | ❌ (403) | ❌ (404) |
+| Marcar vacina como aplicada | ✅ | ✅ | ❌ (404) |
 | Editar sensibilidade e personalidades | ✅ | ❌ (403) | ❌ (404) |
 | Atualizar foto do pet | ✅ | ❌ (403) | ❌ (404) |
 | Ver e processar solicitações de vínculo | ✅ | ❌ (403) | ❌ (404) |
@@ -172,9 +179,11 @@ Todos os endpoints (exceto os públicos) exigem `Authorization: Bearer <token>`.
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
-| `POST` | `/api/pets/{idPet}/vacinas` | Registra uma vacina para o pet (somente DONO) |
-| `GET` | `/api/pets/{idPet}/vacinas` | Lista as vacinas do pet, da aplicação mais recente para a mais antiga |
+| `POST` | `/api/pets/{idPet}/vacinas` | Registra uma vacina para o pet, sempre como `PENDENTE` (somente DONO) |
+| `GET` | `/api/pets/{idPet}/vacinas` | Lista as vacinas do pet, da aplicação mais recente para a mais antiga, com `statusVacina` |
 | `PUT` | `/api/vacinas/{idVacina}` | Altera uma vacina (somente DONO) |
+| `PATCH` | `/api/vacinas/{idVacina}/aplicar` | Marca a vacina como aplicada hoje e calcula a próxima dose (qualquer vínculo aceito; `409` se já aplicada) |
+
 
 ### Exemplos
 
@@ -194,12 +203,16 @@ curl -X POST http://localhost:8080/api/pets/1/tarefas \
 curl -X POST http://localhost:8080/api/pets/1/vacinas \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
-  -d '{"nome":"V10","dataAplicacao":"2026-10-01","dataProximaDose":"2027-10-01","observacao":"Aplicada na clínica"}'
+  -d '{"nome":"V10","dosagemUnica":false,"intervaloQuantidade":1,"intervaloUnidade":"ANOS","observacao":"Reforço anual"}'
+
+# Marcar a vacina como aplicada (data de aplicação = hoje, próxima dose calculada)
+curl -X PATCH http://localhost:8080/api/vacinas/1/aplicar \
+  -H "Authorization: Bearer <token>"
 ```
 
 ### Regras de validação
 
-- **Vacina**: `nome` e `dataAplicacao` são obrigatórios; a data de aplicação não pode ser futura e a próxima dose não pode ser anterior à aplicação; a observação aceita até 500 caracteres.
+- **Vacina**: `nome` e `dosagemUnica` são obrigatórios; vacina de dose única não aceita intervalo; vacina que não é dose única exige intervalo (quantidade e unidade) com quantidade maior que zero; a observação aceita até 500 caracteres. Uma vacina já aplicada não pode ser aplicada novamente.
 - **Tarefa**: `titulo` e `dataTarefa` são obrigatórios; uma tarefa já concluída não pode ser alterada nem concluída novamente.
 
 ### Erros
@@ -208,10 +221,10 @@ Tratados de forma central no `GlobalExceptionHandler`:
 
 | Status | Quando |
 | --- | --- |
-| `400` | Validação de campos, datas inválidas, foto inválida ou grande demais |
+| `400` | Validação de campos, datas inválidas, intervalo de vacina inválido, foto inválida ou grande demais |
 | `403` | Sem token ou sem permissão para a ação |
 | `404` | Pet, tarefa, vacina ou solicitação não encontrada (ou sem acesso a ela) |
-| `409` | Conflito, como e-mail ou telefone já cadastrado, solicitação de vínculo duplicada ou tarefa já concluída |
+| `409` | Conflito, como e-mail ou telefone já cadastrado, solicitação de vínculo duplicada, tarefa já concluída ou vacina já aplicada |
 
 ---
 
@@ -272,6 +285,7 @@ O `Dockerfile` é multi-stage: compila com `eclipse-temurin:21-jdk` + Maven Wrap
 - `spring.jpa.open-in-view=false`: relacionamentos `LAZY` são acessados dentro de `@Transactional` e copiados para os DTOs (`List.copyOf`).
 - `@GeneratedValue(strategy = GenerationType.IDENTITY)` em todas as entidades (necessário com MySQL no Hibernate 7).
 - Coleções `@ElementCollection` (como `pet_personalidades`) podem não ter a tabela criada pelo Hibernate no `ddl-auto=update`; confira com `SHOW TABLES` após deploys que criem tabelas novas. A Aiven exige chave primária em todas as tabelas.
+- A tabela `vacina` mudou de estrutura (status, dose única e intervalo no lugar de data da próxima dose informada). Como o `ddl-auto=update` não remove nem converte colunas antigas, a tabela precisa ser recriada (DROP e nova criação pelo Hibernate) no banco local e na Aiven, o que é seguro enquanto ainda não há registros de vacina.
 - Os controllers recebem o usuário autenticado com `@AuthenticationPrincipal Usuario`, sem acessar o `SecurityContextHolder` diretamente.
 
 ---
@@ -286,11 +300,11 @@ O `Dockerfile` é multi-stage: compila com `eclipse-temurin:21-jdk` + Maven Wrap
 - [x] Módulo de vacinas (registrar, listar e alterar)
 - [ ] Rodada de testes consolidada e deploy para integração com o app Android
 - [ ] Solicitação de alteração: o suporte propõe a mudança e o dono aprova ou recusa (tarefas e vacinas)
-- [ ] Eventos na agenda (totalmente customizáveis)
+- [ ] Alertas de vacina baseados na data da próxima dose
 - [ ] Verificação de e-mail no cadastro
 - [ ] Revisão de atomicidade (`@Transactional`) no cadastro de usuário
 - [ ] Padronizar o nome dos DTOs em `Request`/`Response`
-- [ ] Migrações de banco com Flyway ou Liquibase
+
 
 ---
 

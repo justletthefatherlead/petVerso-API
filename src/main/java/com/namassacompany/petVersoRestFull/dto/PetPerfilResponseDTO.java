@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 
-public record PetPerfilDTO(
+public record PetPerfilResponseDTO(
         Long id,
         String nome,
         String raca,
@@ -23,7 +23,7 @@ public record PetPerfilDTO(
         String perfilDeSensibilidade,
         List<String> personalidades
 ) {
-    public PetPerfilDTO(Pet pet, Papel papel){
+    public PetPerfilResponseDTO(Pet pet, Papel papel){
         this(pet.getIdPet(), pet.getNome(), pet.getRaca(), pet.getEspecie(),pet.getDataDeNascimento(), pet.getPorte(), pet.getPeso(), pet.getSexo(),
                 (pet.getFoto() != null) ? Base64.getEncoder().encodeToString(pet.getFoto()): null,
                 (papel == Papel.DONO)? pet.getCodigoVinculo() : null,

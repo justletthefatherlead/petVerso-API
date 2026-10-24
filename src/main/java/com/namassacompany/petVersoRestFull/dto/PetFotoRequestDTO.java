@@ -1,6 +1,6 @@
 package com.namassacompany.petVersoRestFull.dto;
 
-public record AtualizarFotoPetDTO(
+public record PetFotoRequestDTO(
         String fotoBase64
 ) {
 }

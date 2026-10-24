@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -68,7 +69,7 @@ public class TarefaService {
         }
         tarefa.setConcluida(true);
         tarefa.setExecutadoPor(usuario);
-        tarefa.setDataConclusao(LocalDateTime.now());
+        tarefa.setDataConclusao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
 
         return new TarefaResponseDTO(tarefa);
     }

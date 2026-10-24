@@ -46,4 +46,11 @@ public class VacinaController {
         VacinaResponseDTO vacinaAtuzaliada = vacinaService.atualizar(idVacina, dto, usuario);
         return ResponseEntity.ok().body(vacinaAtuzaliada);
     }
+    @PatchMapping("/vacinas/{idVacina}/aplicar")
+    public ResponseEntity<VacinaResponseDTO> marcarComoAplicada(
+            @PathVariable Long idVacina,
+            @AuthenticationPrincipal Usuario usuario
+    ){
+        return ResponseEntity.ok(vacinaService.marcarComoAplicada(idVacina,usuario));
+    }
 }

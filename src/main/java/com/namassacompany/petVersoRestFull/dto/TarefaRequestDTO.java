@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record TarefaCadastroDTO(
+public record TarefaRequestDTO(
         @NotBlank String titulo,
         String descricao,
         @NotNull LocalDate dataTarefa,
