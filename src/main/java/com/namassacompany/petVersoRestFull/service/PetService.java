@@ -31,7 +31,7 @@ public class PetService {
     }
 
     @Transactional
-    public AtualizarFotoPetDTO atualizarFotoPet(Long id, Usuario usuario, AtualizarFotoPetDTO dto) {
+    public PetFotoRequestDTO atualizarFotoPet(Long id, Usuario usuario, PetFotoRequestDTO dto) {
         Pet pet = petRepository.findById(id)
                 .orElseThrow(() -> new PetNaoEncontradoException("Pet não encontrado"));
 
@@ -58,10 +58,10 @@ public class PetService {
         pet.setFoto(foto);
         Pet salvo = petRepository.save(pet);
 
-        return new AtualizarFotoPetDTO(Base64.getEncoder().encodeToString(salvo.getFoto()));
+        return new PetFotoRequestDTO(Base64.getEncoder().encodeToString(salvo.getFoto()));
     }
     @Transactional
-   public PetCadastroResponseDTO cadastrar(PetCadastroDTO petdto, Usuario usuario){
+   public PetResponseDTO cadastrar(PetRequestDTO petdto, Usuario usuario){
        String codigoVinculo = gerarCodigoVinculo();
         byte[] foto= null;
         if (petdto.fotoBase64() != null){
@@ -97,21 +97,21 @@ public class PetService {
        vinculoPetRepository.save(vinculoPet);
 
 
-        return new PetCadastroResponseDTO(
+        return new PetResponseDTO(
                 petSalvo
         );
    }
 
     @Transactional(readOnly = true)
-   public PetPerfilDTO visualizarPetPerfil(Long idPet, Usuario usuarioAutenticado){
+   public PetPerfilResponseDTO visualizarPetPerfil(Long idPet, Usuario usuarioAutenticado){
         Pet pet = petRepository.findById(idPet).
                 orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
         Papel papel = buscarVinculoAceito(pet, usuarioAutenticado).getPapel();
 
-        return new PetPerfilDTO(pet,papel);
+        return new PetPerfilResponseDTO(pet,papel);
    }
 
-    public PetPerfilDTO addPerfilSensiAndPersonalit(Long idPet, AtualizarPetDTO pdto, Usuario usuario){
+    public PetPerfilResponseDTO addPerfilSensiAndPersonalit(Long idPet, PetPerfilRequestDTO pdto, Usuario usuario){
         Pet pet = petRepository.findById(idPet).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
         VinculoPet vinculo = buscarVinculoAceito(pet, usuario);
         if (vinculo.getPapel()!= Papel.DONO){
@@ -124,11 +124,11 @@ public class PetService {
             pet.setPersonalidades(pdto.personalidades());
         }
 
-        return new PetPerfilDTO(petRepository.save(pet),vinculo.getPapel());
+        return new PetPerfilResponseDTO(petRepository.save(pet),vinculo.getPapel());
     }
 
     @Transactional
-    public SolicitarVinculoResponseDTO solicitarVinculo(Usuario usuario, SolicitarVinculoDTO dto){
+    public VinculoResponseDTO solicitarVinculo(Usuario usuario, VinculoRequestDTO dto){
         String codigo  = dto.codigoVinculo();
         Pet pet = petRepository.findByCodigoVinculo(codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Código de vínculo inválido"));
@@ -156,13 +156,13 @@ public class PetService {
 
             }
             vinculoPetRepository.save(vinculo);
-            var dados = new SolicitarVinculoResponseDTO.DadosSolicitacaoDTO(
+            var dados = new VinculoResponseDTO.DadosVinculoResponseDTO(
                     vinculo.getId(),
                     codigo,
                     pet.getNome(),
                     vinculo.getDataDeCriacao()
             );
-            return new SolicitarVinculoResponseDTO(
+            return new VinculoResponseDTO(
                     true,
                     "Solicitação enviada com sucesso! Aguarde a confirmação do tutor",
                     StatusDeVinculo.PENDENTE,
@@ -171,9 +171,9 @@ public class PetService {
     }
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoPendenteDTO> listarSolicitacoes(Usuario usuario){
+    public List<SolicitacaoResponseDTO> listarSolicitacoes(Usuario usuario){
         List<VinculoPet> vinculosDono = vinculoPetRepository.findByUsuarioAndPapel(usuario, Papel.DONO);
-        List<SolicitacaoPendenteDTO> resultado = new ArrayList<>();
+        List<SolicitacaoResponseDTO> resultado = new ArrayList<>();
 
         for (VinculoPet vinculoDono : vinculosDono) {
             if (vinculoDono.getStatus()!= StatusDeVinculo.ACEITO){
@@ -183,7 +183,7 @@ public class PetService {
 
             List<VinculoPet> pendentes = vinculoPetRepository.findByPetAndStatus(pet,StatusDeVinculo.PENDENTE);
             for (VinculoPet solicitacao : pendentes){
-                resultado.add(new SolicitacaoPendenteDTO(
+                resultado.add(new SolicitacaoResponseDTO(
                         solicitacao.getId(),
                         solicitacao.getUsuario().getNome(),
                         pet.getNome(),
@@ -194,7 +194,7 @@ public class PetService {
         return  resultado;
     }
     @Transactional
-    public  SolicitarVinculoResponseDTO processarSolicitacao(Long idSolicitacao, StatusDeVinculo novoStatus, Usuario usuario){
+    public VinculoResponseDTO processarSolicitacao(Long idSolicitacao, StatusDeVinculo novoStatus, Usuario usuario){
         VinculoPet solicitacao =  vinculoPetRepository.findById(idSolicitacao).orElseThrow(()-> new PetNaoEncontradoException("solicitacao nao existe"));
         VinculoPet meuVinculo = vinculoPetRepository.findByPetAndUsuario(solicitacao.getPet(), usuario).orElseThrow(()-> new PetNaoEncontradoException("solicitacao nao existe"));
         if(meuVinculo.getPapel()!= Papel.DONO || meuVinculo.getStatus() != StatusDeVinculo.ACEITO){
@@ -209,11 +209,11 @@ public class PetService {
         solicitacao.setStatus(novoStatus);
         vinculoPetRepository.save(solicitacao);
 
-        return new SolicitarVinculoResponseDTO(
+        return new VinculoResponseDTO(
                    true,
                     "concluido",
                     novoStatus,
-                new SolicitarVinculoResponseDTO.DadosSolicitacaoDTO(
+                new VinculoResponseDTO.DadosVinculoResponseDTO(
                         solicitacao.getId(),
                         solicitacao.getPet().getCodigoVinculo(),
                         solicitacao.getPet().getNome(),
@@ -226,9 +226,9 @@ public class PetService {
     }
 
     @Transactional(readOnly = true)
-    public List<PetResumoDTO> listarPets(Usuario usuario){
+    public List<PetResumoResponseDTO> listarPets(Usuario usuario){
         List<VinculoPet> vinculos = vinculoPetRepository.findByUsuarioAndStatus(usuario, StatusDeVinculo.ACEITO);
-        return vinculos.stream().map(PetResumoDTO::new).toList();
+        return vinculos.stream().map(PetResumoResponseDTO::new).toList();
     }
 
 

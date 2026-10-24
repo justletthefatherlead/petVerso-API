@@ -1,6 +1,6 @@
 package com.namassacompany.petVersoRestFull.service;
 
-import com.namassacompany.petVersoRestFull.dto.LoginDTO;
+import com.namassacompany.petVersoRestFull.dto.LoginRequestDTO;
 import com.namassacompany.petVersoRestFull.dto.TokenResponseDTO;
 import com.namassacompany.petVersoRestFull.exception.CredenciaisInvalidasException;
 import com.namassacompany.petVersoRestFull.model.Sessao;
@@ -26,7 +26,7 @@ public class AuthService {
         this.sessaoRepository = sessaoRepository;
     }
 
-    public TokenResponseDTO login(LoginDTO dto) {
+    public TokenResponseDTO login(LoginRequestDTO dto) {
         Optional<Usuario> usuarioEncontrado = usuarioRepository.findByEmail(dto.login());
         if (usuarioEncontrado.isEmpty()) {
             throw new CredenciaisInvalidasException("Email ou senha invalidos");

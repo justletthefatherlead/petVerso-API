@@ -21,7 +21,7 @@ public class VacinaService {
     private final VacinaRepository vacinaRepository;
     private final PetRepository petRepository;
     private final VinculoAcessoService vinculoAcessoService;
-
+    private static final ZoneId  ZONA = ZoneId.of("America/Sao_Paulo");
     public VacinaService(VacinaRepository vacinaRepository, PetRepository petRepository, VinculoAcessoService vinculoAcessoService) {
         this.vacinaRepository = vacinaRepository;
         this.petRepository = petRepository;
@@ -33,6 +33,9 @@ public class VacinaService {
         Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
         vinculoAcessoService.buscarVinculoDono(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
         validarIntervalo(dto);
+        boolean aplicada = dto.jaAplicada();
+        validarDataSeAplicada(dto);
+
         Vacina vacina = new Vacina(
                 pet,
                 dto.nome(),
@@ -42,9 +45,9 @@ public class VacinaService {
                 dto.intervaloUnidade(),
                 null,
                 dto.observacao(),
-                StatusVacina.PENDENTE
-
+                aplicada ? StatusVacina.APLICADA : StatusVacina.PENDENTE
         );
+        recalcularProximaDose(vacina);
         return new VacinaResponseDTO(vacinaRepository.save(vacina));
     }
 
@@ -64,15 +67,26 @@ public class VacinaService {
     public VacinaResponseDTO atualizar(Long idVacina, VacinaRequestDTO dto, Usuario usuario) {
         Vacina vacina = vacinaRepository.findById(idVacina).orElseThrow(() -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(vacina.getPet(), usuario, () -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
-
         validarIntervalo(dto);
+
+        boolean estavaAplicada = vacina.getStatus() == StatusVacina.APLICADA;
+
+
+        if (estavaAplicada && !dto.jaAplicada()){
+            throw new DadosInvalidosException(" Vacina já aplicada nao pode voltar a pendente");
+        }
+       validarDataSeAplicada(dto);
+
+
         vacina.setNome(dto.nome());
         vacina.setDataAplicacao(dto.dataAplicacao());
         vacina.setDosagemUnica(dto.dosagemUnica());
         vacina.setIntervaloQuantidade(dto.intervaloQuantidade());
         vacina.setIntervaloUnidade(dto.intervaloUnidade());
-        recalcularProximaDose(vacina);
         vacina.setObservacao(dto.observacao());
+        vacina.setStatus(dto.jaAplicada() ? StatusVacina.APLICADA : StatusVacina.PENDENTE);
+       recalcularProximaDose(vacina);
+
 
         return new VacinaResponseDTO(vacina);
 
@@ -84,7 +98,7 @@ public class VacinaService {
         vinculoAcessoService.buscarVinculoAceito(vacina.getPet(), usuario, () -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
         if (vacina.getStatus() == StatusVacina.APLICADA) throw new IllegalStateException("Essa vacina ja foi aplicada");
         vacina.setStatus(StatusVacina.APLICADA);
-        vacina.setDataAplicacao(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+        vacina.setDataAplicacao(LocalDate.now(ZONA));
         recalcularProximaDose(vacina);
 
         return new VacinaResponseDTO(vacina);
@@ -120,6 +134,11 @@ public class VacinaService {
             return;
         }
         vacina.setDataProximaDose(null);
+    }
+    private void validarDataSeAplicada(VacinaRequestDTO dto){
+        if (dto.jaAplicada() && dto.dataAplicacao().isAfter(LocalDate.now(ZONA))){
+            throw new DadosInvalidosException("Vacina ja aplicada nao pode ter data futura");
+        }
     }
 
 }

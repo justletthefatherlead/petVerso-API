@@ -1,14 +1,12 @@
 package com.namassacompany.petVersoRestFull.service;
 
-import com.namassacompany.petVersoRestFull.dto.TarefaCadastroDTO;
+import com.namassacompany.petVersoRestFull.dto.TarefaRequestDTO;
 import com.namassacompany.petVersoRestFull.dto.TarefaResponseDTO;
-import com.namassacompany.petVersoRestFull.exception.AcessoNegadoException;
 import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
 import com.namassacompany.petVersoRestFull.exception.TarefaNaoEncontradaException;
 import com.namassacompany.petVersoRestFull.model.*;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
 import com.namassacompany.petVersoRestFull.repository.TarefaRepository;
-import com.namassacompany.petVersoRestFull.repository.VinculoPetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.function.Supplier;
 
 @Service
 public class TarefaService {
@@ -31,7 +28,7 @@ public class TarefaService {
     }
 
     @Transactional
-    public TarefaResponseDTO criar(Long idPet, TarefaCadastroDTO dto, Usuario usuario) {
+    public TarefaResponseDTO criar(Long idPet, TarefaRequestDTO dto, Usuario usuario) {
         Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
         vinculoAcessoService.buscarVinculoAceito(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
         Tarefa tarefa = new Tarefa(
@@ -75,7 +72,7 @@ public class TarefaService {
     }
 
     @Transactional
-    public TarefaResponseDTO atualizarTarefa(Long idTarefa, TarefaCadastroDTO dto, Usuario usuario) {
+    public TarefaResponseDTO atualizarTarefa(Long idTarefa, TarefaRequestDTO dto, Usuario usuario) {
         Tarefa tarefa = tarefaRepository.findById(idTarefa).orElseThrow(() -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
 

@@ -25,7 +25,7 @@ public class UsuarioService {
         this.authService = authService;
     }
     @Transactional
-    public UsuarioCadastroResponseDTO cadastrar(UsuarioCadastroDTO dto){
+    public UsuarioCadastroResponseDTO cadastrar(UsuarioRequestDTO dto){
 
         if(usuarioRepository.existsByEmail(dto.email())){
             throw new EmailJaCadastradoException("o email "+ dto.email()+" ja esta cadastrado.");
@@ -56,7 +56,7 @@ public class UsuarioService {
         );
     }
 
-    public UsuarioPerfilDTO atualizarPerfil(AtualizarPerfilDTO dto, Usuario usuario){
+    public UsuarioPerfilResponseDTO atualizarPerfil(UsuarioPerfilRequestDTO dto, Usuario usuario){
         if(dto.apelido()!= null ){
             usuario.setApelido(dto.apelido());
         }
@@ -65,11 +65,11 @@ public class UsuarioService {
         }
         Usuario usuariosalvo = usuarioRepository.save(usuario);
 
-        return new UsuarioPerfilDTO(usuariosalvo);
+        return new UsuarioPerfilResponseDTO(usuariosalvo);
     }
 
-    public UsuarioPerfilDTO vizualizarPerfil(Usuario usuario){
-        return new UsuarioPerfilDTO(usuario);
+    public UsuarioPerfilResponseDTO vizualizarPerfil(Usuario usuario){
+        return new UsuarioPerfilResponseDTO(usuario);
     }
 
 }
