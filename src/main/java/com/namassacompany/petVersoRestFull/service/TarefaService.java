@@ -6,6 +6,7 @@ import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
 import com.namassacompany.petVersoRestFull.exception.TarefaNaoEncontradaException;
 import com.namassacompany.petVersoRestFull.model.*;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
+import com.namassacompany.petVersoRestFull.repository.SolicitacaoAlteracaoRepository;
 import com.namassacompany.petVersoRestFull.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +21,13 @@ public class TarefaService {
     private final PetRepository petRepository;
     private final VinculoAcessoService vinculoAcessoService;
     private final TarefaRepository tarefaRepository;
+    private final SolicitacaoAlteracaoRepository solicitacaoAlteracaoRepository;
 
-    public TarefaService(PetRepository petRepository, VinculoAcessoService vinculoAcessoService, TarefaRepository tarefaRepository) {
+    public TarefaService(PetRepository petRepository, VinculoAcessoService vinculoAcessoService, TarefaRepository tarefaRepository, SolicitacaoAlteracaoRepository solicitacaoAlteracaoRepository) {
         this.petRepository = petRepository;
         this.vinculoAcessoService = vinculoAcessoService;
         this.tarefaRepository = tarefaRepository;
+        this.solicitacaoAlteracaoRepository = solicitacaoAlteracaoRepository;
     }
 
     @Transactional
@@ -84,6 +87,14 @@ public class TarefaService {
         tarefa.setHora(dto.hora());
 
         return new TarefaResponseDTO(tarefa);
+    }
+    @Transactional
+    public void deletarTarefa(Long idTarefa, Usuario usuario){
+        Tarefa tarefa =  tarefaRepository.findById(idTarefa).orElseThrow(()-> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+        vinculoAcessoService.buscarVinculoDono(tarefa.getPet(), usuario, ()-> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
+        solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.TAREFA, idTarefa);
+        tarefaRepository.delete(tarefa);
+
     }
 
 
