@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.DescriptorKey;
 import java.util.List;
 
 @RestController
@@ -52,5 +53,12 @@ public class VacinaController {
             @AuthenticationPrincipal Usuario usuario
     ){
         return ResponseEntity.ok(vacinaService.marcarComoAplicada(idVacina,usuario));
+    }
+
+    @DeleteMapping("/vacinas/{idVacina}")
+    public ResponseEntity<Void> excluirVacina(@PathVariable Long idVacina, @AuthenticationPrincipal Usuario usuario){
+        vacinaService.excluir(idVacina, usuario);
+        return ResponseEntity.noContent().build();
+
     }
 }
