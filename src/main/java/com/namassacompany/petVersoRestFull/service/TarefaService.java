@@ -89,7 +89,7 @@ public class TarefaService {
         return new TarefaResponseDTO(tarefa);
     }
     @Transactional
-    public void deletarTarefa(Long idTarefa, Usuario usuario){
+    public void excluir(Long idTarefa, Usuario usuario){
         Tarefa tarefa =  tarefaRepository.findById(idTarefa).orElseThrow(()-> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(tarefa.getPet(), usuario, ()-> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
         solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.TAREFA, idTarefa);

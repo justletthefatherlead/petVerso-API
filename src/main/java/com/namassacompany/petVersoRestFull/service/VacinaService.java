@@ -7,6 +7,7 @@ import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
 import com.namassacompany.petVersoRestFull.exception.VacinaNaoEncontradaException;
 import com.namassacompany.petVersoRestFull.model.*;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
+import com.namassacompany.petVersoRestFull.repository.SolicitacaoAlteracaoRepository;
 import com.namassacompany.petVersoRestFull.repository.VacinaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,14 @@ public class VacinaService {
     private final VacinaRepository vacinaRepository;
     private final PetRepository petRepository;
     private final VinculoAcessoService vinculoAcessoService;
+    private final SolicitacaoAlteracaoRepository solicitacaoAlteracaoRepository;
+
     private static final ZoneId  ZONA = ZoneId.of("America/Sao_Paulo");
-    public VacinaService(VacinaRepository vacinaRepository, PetRepository petRepository, VinculoAcessoService vinculoAcessoService) {
+    public VacinaService(VacinaRepository vacinaRepository, PetRepository petRepository, VinculoAcessoService vinculoAcessoService, SolicitacaoAlteracaoRepository solicitacaoAlteracaoRepository) {
         this.vacinaRepository = vacinaRepository;
         this.petRepository = petRepository;
         this.vinculoAcessoService = vinculoAcessoService;
+        this.solicitacaoAlteracaoRepository = solicitacaoAlteracaoRepository;
     }
 
     @Transactional
@@ -104,6 +108,14 @@ public class VacinaService {
         return new VacinaResponseDTO(vacina);
     }
 
+    @Transactional
+    public void excluir(Long idVacina , Usuario usuario){
+        Vacina vacina = vacinaRepository.findById(idVacina).orElseThrow(()-> new VacinaNaoEncontradaException("Vacina nao encontrada"));
+        vinculoAcessoService.buscarVinculoDono(vacina.getPet(), usuario, ()->new VacinaNaoEncontradaException("Vacina nao encontrada"));
+        solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.VACINA, idVacina);
+        vacinaRepository.delete(vacina);
+    }
+
     private void validarIntervalo(VacinaRequestDTO dto) {
         if (dto.dosagemUnica()) {
             if (dto.intervaloUnidade() != null || dto.intervaloQuantidade() != null) {
@@ -119,7 +131,6 @@ public class VacinaService {
 
         }
     }
-
     private LocalDate calcularProximaDose(LocalDate base, Integer quantidade, IntervaloUnidade unidade) {
         return switch (unidade) {
             case DIAS -> base.plusDays(quantidade);
