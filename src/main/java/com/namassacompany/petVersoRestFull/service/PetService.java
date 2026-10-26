@@ -233,7 +233,19 @@ public class PetService {
         return vinculos.stream().map(PetResumoResponseDTO::new).toList();
     }
 
+    public PetResponseDTO alterarDados(Long idPet, PetRequestDTO dto, Usuario usuario){
+        Pet pet = petRepository.findById(idPet).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
+        vinculoAcessoService.buscarVinculoAceito(pet, usuario,()-> new PetNaoEncontradoException("Pet nao econtrado"));
+        pet.setNome(dto.nome());
+        pet.setRaca(dto.raca());
+        pet.setEspecie(dto.especie());
+        pet.setPorte(dto.porte());
+        pet.setPeso(dto.peso());
+        pet.setSexo(dto.sexo());
+        pet.setDataDeNascimento(dto.dataDeNascimento());
 
+        return new PetResponseDTO(pet);
+    }
 
 
     private String gerarCodigoBruto() {

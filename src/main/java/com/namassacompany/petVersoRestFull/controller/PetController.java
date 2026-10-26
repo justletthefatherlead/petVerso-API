@@ -71,4 +71,12 @@ public class PetController {
         PetFotoRequestDTO petFotoRequestDTO = petService.atualizarFotoPet(id, usuario, dto);
         return ResponseEntity.ok(petFotoRequestDTO);
     }
+
+    @PutMapping("/{idPet}/dados")
+    public PetResponseDTO alterarDados(@PathVariable Long idPet,
+                                                       @AuthenticationPrincipal Usuario usuario,
+                                                       @Valid @RequestBody PetRequestDTO dto){
+        return petService.alterarDados(idPet, dto, usuario);
+    }
+
 }
