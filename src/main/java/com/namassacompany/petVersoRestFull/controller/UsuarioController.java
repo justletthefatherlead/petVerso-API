@@ -43,6 +43,23 @@ public class UsuarioController {
 
 
     }
+    @PutMapping("/dados")
+    public UsuarioResponseDTO alterarDados(@AuthenticationPrincipal Usuario usuario,
+                                           @Valid @RequestBody UsuarioDadosRequestDTO dto){
+        return usuarioService.alterarDados(usuario,dto);
+
+    }
+
+    @PutMapping("/senha")
+    public ResponseEntity<Void> alterarSenha(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestHeader("Authorization") String authorization,
+            @Valid @RequestBody UsuarioSenhaRequestDTO dto
+    ){
+        String token = authorization.substring("Bearer".length());
+        usuarioService.alterarSenha(usuario,token, dto);
+        return ResponseEntity.noContent().build();
+    }
 }
 
 
