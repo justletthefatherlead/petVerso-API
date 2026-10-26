@@ -24,10 +24,12 @@ public class PetService {
     private static final String caracteres = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     private final PetRepository petRepository;
     private final VinculoPetRepository vinculoPetRepository;
+    private final VinculoAcessoService vinculoAcessoService;
 
-    public PetService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository) {
+    public PetService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository, VinculoAcessoService vinculoAcessoService) {
         this.petRepository = petRepository;
         this.vinculoPetRepository = vinculoPetRepository;
+        this.vinculoAcessoService = vinculoAcessoService;
     }
 
     @Transactional
@@ -35,7 +37,7 @@ public class PetService {
         Pet pet = petRepository.findById(id)
                 .orElseThrow(() -> new PetNaoEncontradoException("Pet não encontrado"));
 
-        VinculoPet vinculo = buscarVinculoAceito(pet, usuario);
+        VinculoPet vinculo = vinculoAcessoService.buscarVinculoAceito(pet, usuario,()-> new PetNaoEncontradoException("Pet nao encontrado"));
         if (vinculo.getPapel() != Papel.DONO) {
             throw new AcessoNegadoException("Seu papel não permite fazer alterações");
         }
@@ -106,14 +108,14 @@ public class PetService {
    public PetPerfilResponseDTO visualizarPetPerfil(Long idPet, Usuario usuarioAutenticado){
         Pet pet = petRepository.findById(idPet).
                 orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
-        Papel papel = buscarVinculoAceito(pet, usuarioAutenticado).getPapel();
+        Papel papel = vinculoAcessoService.buscarVinculoAceito(pet, usuarioAutenticado, ()-> new PetNaoEncontradoException("Pet nao encontrado")).getPapel();
 
         return new PetPerfilResponseDTO(pet,papel);
    }
 
     public PetPerfilResponseDTO addPerfilSensiAndPersonalit(Long idPet, PetPerfilRequestDTO pdto, Usuario usuario){
         Pet pet = petRepository.findById(idPet).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
-        VinculoPet vinculo = buscarVinculoAceito(pet, usuario);
+        VinculoPet vinculo = vinculoAcessoService.buscarVinculoAceito(pet, usuario,()-> new PetNaoEncontradoException("Pet nao encontrado"));
         if (vinculo.getPapel()!= Papel.DONO){
             throw new AcessoNegadoException("Seu papel nao permite fazer alterações");
         }
@@ -232,6 +234,8 @@ public class PetService {
     }
 
 
+
+
     private String gerarCodigoBruto() {
         StringBuilder sb = new StringBuilder(6);
         for (int i = 0; i < 6; i++) {
@@ -248,13 +252,6 @@ public class PetService {
             codigo = gerarCodigoBruto();
         }
         return codigo;
-    }
-    private VinculoPet buscarVinculoAceito(Pet pet, Usuario usuario) {
-      VinculoPet vinculo =  vinculoPetRepository.findByPetAndUsuario(pet, usuario).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
-      if (vinculo.getStatus()!= StatusDeVinculo.ACEITO){
-          throw new PetNaoEncontradoException("Pet nao encontrado");
-      }
-      return vinculo;
     }
     private static final int TAMANHO_MAXIMO_FOTO = 5 * 1024 * 1024;
 
