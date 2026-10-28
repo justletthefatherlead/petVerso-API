@@ -31,6 +31,10 @@ public class Tarefa {
     @Column(name = "hora")
     private LocalTime hora;
 
+    @JoinColumn(name = "criado_por", nullable = false)
+    @ManyToOne(fetch = LAZY)
+    private Usuario criadaPor;
+
     @Column(name = "concluida", nullable = false)
     private boolean concluida;
 
@@ -41,23 +45,34 @@ public class Tarefa {
     @Column(name = "data_conclusao")
     private LocalDateTime dataConclusao;
 
-    @Column(name = "data_criacao", nullable = false,updatable = false)
+    @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
     @PrePersist
-    void aoCriar(){
-        if (dataCriacao == null){
+    void aoCriar() {
+        if (dataCriacao == null) {
             dataCriacao = LocalDateTime.now();
         }
     }
-    public Tarefa (){}
 
-    public Tarefa(Pet pet, String titulo, String descricao,LocalDate dataTarefa, LocalTime hora) {
+    public Tarefa() {
+    }
+
+    public Tarefa(Pet pet, String titulo, String descricao, LocalDate dataTarefa, LocalTime hora, Usuario criadaPor) {
         this.pet = pet;
         this.titulo = titulo;
         this.descricao = descricao;
         this.dataTarefa = dataTarefa;
         this.hora = hora;
+        this.criadaPor = criadaPor;
+    }
+
+    public Usuario getCriadaPor() {
+        return criadaPor;
+    }
+
+    public void setCriadaPor(Usuario criadaPor) {
+        this.criadaPor = criadaPor;
     }
 
     public Long getIdTarefa() {

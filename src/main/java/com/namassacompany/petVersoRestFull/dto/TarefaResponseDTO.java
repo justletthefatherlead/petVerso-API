@@ -13,6 +13,7 @@ public record TarefaResponseDTO(
         String descricao,
         LocalDate dataTarefa,
         LocalTime hora,
+        String criadaPor,
         boolean concluida,
         Long idPet,
         String nomePet,
@@ -32,6 +33,6 @@ public record TarefaResponseDTO(
     }
     public TarefaResponseDTO(Tarefa tarefa){
         this(tarefa.getIdTarefa(), tarefa.getTitulo(),tarefa.getDescricao(),tarefa.getDataTarefa(),
-                tarefa.getHora(), tarefa.isConcluida(),tarefa.getPet().getIdPet(),tarefa.getPet().getNome(), nomeDoExecutor(tarefa), tarefa.getDataConclusao());
+                tarefa.getHora(),tarefa.getCriadaPor().getNome(), tarefa.isConcluida(),tarefa.getPet().getIdPet(),tarefa.getPet().getNome(), nomeDoExecutor(tarefa), tarefa.getDataConclusao());
     }
 }

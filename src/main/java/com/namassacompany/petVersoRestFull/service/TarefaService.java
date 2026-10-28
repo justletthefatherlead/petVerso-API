@@ -39,8 +39,10 @@ public class TarefaService {
                 dto.titulo(),
                 dto.descricao(),
                 dto.dataTarefa(),
-                dto.hora()
+                dto.hora(),
+                usuario
         );
+
         return new TarefaResponseDTO(tarefaRepository.save(tarefa));
 
 
