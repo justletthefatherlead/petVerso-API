@@ -104,7 +104,6 @@ public class VacinaService {
         vacina.setStatus(StatusVacina.APLICADA);
         vacina.setDataAplicacao(LocalDate.now(ZONA));
         recalcularProximaDose(vacina);
-
         return new VacinaResponseDTO(vacina);
     }
 

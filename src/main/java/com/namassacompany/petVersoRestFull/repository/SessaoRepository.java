@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface SessaoRepository extends JpaRepository<Sessao, Long> {
 
     void deleteByToken(String token);
-    void deleteUsuarioAndTokenNot(Usuario usuario, String token);
+    void deleteByUsuarioAndTokenNot(Usuario usuario, String token);
 
     Optional<Sessao> findByToken(String token);
 }

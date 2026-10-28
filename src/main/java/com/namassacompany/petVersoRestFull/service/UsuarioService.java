@@ -76,11 +76,11 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO alterarDados(Usuario autenticado, UsuarioDadosRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(autenticado.getIdUsuario()).orElseThrow(() -> new DadosInvalidosException("Usuario nao encontrado"));
-        String telefone = usuario.getTelefone();
-        if (usuarioRepository.existsByTelefoneAndUsuario(telefone, usuario.getIdUsuario())) {
-            throw new TelefoneJaCadastradoException("Telefone ja cadastrado");
-        }
+        if (usuarioRepository.existsByTelefoneAndIdUsuarioNot(dto.telefone(), usuario.getIdUsuario())) throw new TelefoneJaCadastradoException("Telefone ja cadastrado");
+        if(usuarioRepository.existsByEmailAndIdUsuarioNot(dto.email(), usuario.getIdUsuario()))throw new EmailJaCadastradoException("Email ja cadastrado");
+
         usuario.setNome(dto.nome());
+        usuario.setEmail(dto.email());
         usuario.setTelefone(dto.telefone());
         return new UsuarioResponseDTO(usuarioRepository.save(usuario));
     }
@@ -99,7 +99,7 @@ public class UsuarioService {
 
         usuario.setSenha(passwordEncoder.encode(senha.novaSenha()));
         usuarioRepository.save(usuario);
-        sessaoRepository.deleteUsuarioAndTokenNot(usuario,tokenAtual);
+        sessaoRepository.deleteByUsuarioAndTokenNot(usuario,tokenAtual);
 
     }
 
