@@ -31,7 +31,7 @@ public class Tarefa {
     @Column(name = "hora")
     private LocalTime hora;
 
-    @JoinColumn(name = "criado_por", nullable = false)
+    @JoinColumn(name = "criada_por", nullable = false)
     @ManyToOne(fetch = LAZY)
     private Usuario criadaPor;
 
