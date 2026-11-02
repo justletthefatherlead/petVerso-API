@@ -9,6 +9,7 @@ import com.namassacompany.petVersoRestFull.repository.SessaoRepository;
 import com.namassacompany.petVersoRestFull.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -50,6 +51,10 @@ public class AuthService {
         sessaoRepository.save(sessao);
         return new TokenResponseDTO(usuario.getNome(), token);
     }
+
+    @Transactional
+    public void logout(String token){sessaoRepository.deleteByToken(token);}
+
 
     public String gerarToken() {
         SecureRandom secureRandom = new SecureRandom();
