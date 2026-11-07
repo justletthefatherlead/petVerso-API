@@ -15,4 +15,5 @@ public interface VinculoPetRepository extends JpaRepository<VinculoPet, Long> {
     List<VinculoPet> findByUsuarioAndStatus(Usuario usuario, StatusDeVinculo statusDeVinculo);
     List<VinculoPet> findByPetAndStatus(Pet pet, StatusDeVinculo status);
     List<VinculoPet> findByUsuarioAndPapel(Usuario usuario, Papel papel);
+    void deleteByPet(Pet pet);
 }

@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface VacinaRepository extends JpaRepository<Vacina, Long> {
     List<Vacina> findByPetOrderByDataAplicacaoDescIdVacinaDesc(Pet pet);
-
+    void deleteByPet(Pet pet);
 }

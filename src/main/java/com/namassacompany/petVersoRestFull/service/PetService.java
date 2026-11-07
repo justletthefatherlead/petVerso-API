@@ -7,6 +7,8 @@ import com.namassacompany.petVersoRestFull.exception.PetNaoEncontradoException;
 import com.namassacompany.petVersoRestFull.exception.StatusDeVinculoInvalidoException;
 import com.namassacompany.petVersoRestFull.model.*;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
+import com.namassacompany.petVersoRestFull.repository.TarefaRepository;
+import com.namassacompany.petVersoRestFull.repository.VacinaRepository;
 import com.namassacompany.petVersoRestFull.repository.VinculoPetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +27,15 @@ public class PetService {
     private final PetRepository petRepository;
     private final VinculoPetRepository vinculoPetRepository;
     private final VinculoAcessoService vinculoAcessoService;
+    private final TarefaRepository tarefaRepository;
+    private final VacinaRepository vacinaRepository;
 
-    public PetService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository, VinculoAcessoService vinculoAcessoService) {
+    public PetService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository, VinculoAcessoService vinculoAcessoService, TarefaRepository tarefaRepository, VacinaRepository vacinaRepository) {
         this.petRepository = petRepository;
         this.vinculoPetRepository = vinculoPetRepository;
         this.vinculoAcessoService = vinculoAcessoService;
+        this.tarefaRepository = tarefaRepository;
+        this.vacinaRepository = vacinaRepository;
     }
 
     @Transactional
@@ -245,6 +251,15 @@ public class PetService {
         pet.setDataDeNascimento(dto.dataDeNascimento());
 
         return new PetResponseDTO(pet);
+    }
+    @Transactional
+    public void deletarPet(Long idPet, Usuario usuario){
+        Pet pet = petRepository.findById(idPet).orElseThrow(()->new PetNaoEncontradoException("Pet nao encontrado"));
+        vinculoAcessoService.buscarVinculoDono(pet, usuario, ()-> new PetNaoEncontradoException("Pet nao encontrado"));
+        tarefaRepository.deleteByPet(pet);
+        vacinaRepository.deleteByPet(pet);
+        vinculoPetRepository.deleteByPet(pet);
+        petRepository.delete(pet);
     }
 
 

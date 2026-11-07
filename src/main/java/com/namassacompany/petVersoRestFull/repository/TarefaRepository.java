@@ -1,5 +1,6 @@
 package com.namassacompany.petVersoRestFull.repository;
 
+import com.namassacompany.petVersoRestFull.model.Pet;
 import com.namassacompany.petVersoRestFull.model.StatusDeVinculo;
 import com.namassacompany.petVersoRestFull.model.Tarefa;
 import com.namassacompany.petVersoRestFull.model.Usuario;
@@ -24,4 +25,5 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
                             @Param("status") StatusDeVinculo status,
                             @Param("data")LocalDate data
     );
+    void deleteByPet(Pet pet);
 }

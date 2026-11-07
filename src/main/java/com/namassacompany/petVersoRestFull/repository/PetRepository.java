@@ -9,4 +9,5 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     Optional<Pet> findByCodigoVinculo(String codigoVinculo);
 
+
 }
