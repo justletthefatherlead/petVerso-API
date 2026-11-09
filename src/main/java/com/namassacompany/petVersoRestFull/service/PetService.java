@@ -272,6 +272,16 @@ public class PetService {
 
     }
 
+    public void removerMeuVinculo(Long idPet, Usuario usuario){
+        Pet pet = petRepository.findById(idPet).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
+        VinculoPet vinculo = vinculoAcessoService.buscarVinculoAceito(pet, usuario, ()-> new PetNaoEncontradoException("Pet nao encontrado"));
+        if(vinculo.getPapel() == Papel.DONO){
+            throw new AcessoNegadoException("Voce nao tem permissao para remover seu vinculo, voce pode remover outro tutor ou deletar os dados de um pet cadastrado");
+        }
+        vinculoPetRepository.delete(vinculo);
+
+    }
+
 
     private String gerarCodigoBruto() {
         StringBuilder sb = new StringBuilder(6);

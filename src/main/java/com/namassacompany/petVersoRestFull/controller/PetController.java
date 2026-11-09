@@ -94,4 +94,11 @@ public class PetController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{idPet}/vinculo")
+    public ResponseEntity<Void> removerMeuVinculo (@PathVariable Long idPet,
+                                                   @AuthenticationPrincipal Usuario usuario){
+        petService.removerMeuVinculo(idPet, usuario);
+        return ResponseEntity.noContent().build();
+    }
+
 }
