@@ -66,6 +66,13 @@ public class PetController {
         return ResponseEntity.ok(pets);
     }
 
+    @GetMapping("/{idPet}/tutores")
+    public ResponseEntity<List<TutorResponseDTO>> listarTutores(@PathVariable Long idPet,
+                                                                    @AuthenticationPrincipal Usuario usuario){
+        List<TutorResponseDTO> tutores = petService.listarTutores(idPet,usuario);
+        return ResponseEntity.ok(tutores);
+    }
+
     @PutMapping("/{id}/foto")
     public ResponseEntity<PetFotoRequestDTO> atualizarFotoPet(@PathVariable Long id, @RequestBody PetFotoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
         PetFotoRequestDTO petFotoRequestDTO = petService.atualizarFotoPet(id, usuario, dto);
