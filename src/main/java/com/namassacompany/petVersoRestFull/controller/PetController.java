@@ -83,7 +83,14 @@ public class PetController {
     public ResponseEntity<Void> deletarPet(@PathVariable Long idPet,
                                            @AuthenticationPrincipal Usuario usuario){
         petService.deletarPet(idPet, usuario);
+        return ResponseEntity.noContent().build();
+    }
 
+    @DeleteMapping("/{idPet}/tutores/{idUsuario}")
+    public ResponseEntity<Void> removerTutor(@PathVariable Long idPet,
+                                             @PathVariable Long idUsuario,
+                                             @AuthenticationPrincipal Usuario usuario){
+        petService.removerTutor(idPet, idUsuario, usuario);
         return ResponseEntity.noContent().build();
     }
 

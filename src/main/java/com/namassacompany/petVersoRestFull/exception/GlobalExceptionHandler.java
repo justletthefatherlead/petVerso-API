@@ -88,5 +88,12 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(TutorNaoEncontradoException.class)
+    public ResponseEntity<String> handleTutorNaoEcontrado(TutorNaoEncontradoException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
 
 }
