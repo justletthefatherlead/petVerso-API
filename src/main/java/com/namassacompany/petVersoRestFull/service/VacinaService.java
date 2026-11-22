@@ -9,7 +9,6 @@ import com.namassacompany.petVersoRestFull.model.*;
 import com.namassacompany.petVersoRestFull.repository.PetRepository;
 import com.namassacompany.petVersoRestFull.repository.SolicitacaoAlteracaoRepository;
 import com.namassacompany.petVersoRestFull.repository.VacinaRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +35,9 @@ public class VacinaService {
     public VacinaResponseDTO cadastrar(Long idPet, VacinaRequestDTO dto, Usuario usuario) {
         Pet pet = petRepository.findById(idPet).orElseThrow(() -> new PetNaoEncontradoException("Pet nao encontrado"));
         vinculoAcessoService.buscarVinculoDono(pet, usuario, () -> new PetNaoEncontradoException("Pet nao encontrado"));
-        validarIntervalo(dto);
+        dto.validarRegras();
         boolean aplicada = dto.jaAplicada();
-        validarDataSeAplicada(dto);
+
 
         Vacina vacina = new Vacina(
                 pet,
@@ -71,15 +70,7 @@ public class VacinaService {
     public VacinaResponseDTO atualizar(Long idVacina, VacinaRequestDTO dto, Usuario usuario) {
         Vacina vacina = vacinaRepository.findById(idVacina).orElseThrow(() -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(vacina.getPet(), usuario, () -> new VacinaNaoEncontradaException("Vacina nao encontrada"));
-        validarIntervalo(dto);
-
-        boolean estavaAplicada = vacina.getStatus() == StatusVacina.APLICADA;
-
-
-        if (estavaAplicada && !dto.jaAplicada()){
-            throw new DadosInvalidosException(" Vacina já aplicada nao pode voltar a pendente");
-        }
-       validarDataSeAplicada(dto);
+       validarAtualizacao(vacina, dto);
 
 
         vacina.setNome(dto.nome());
@@ -111,25 +102,19 @@ public class VacinaService {
     public void excluir(Long idVacina , Usuario usuario){
         Vacina vacina = vacinaRepository.findById(idVacina).orElseThrow(()-> new VacinaNaoEncontradaException("Vacina nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(vacina.getPet(), usuario, ()->new VacinaNaoEncontradaException("Vacina nao encontrada"));
-        solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.VACINA, idVacina);
+        solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.ALTERAR_VACINA, idVacina);
         vacinaRepository.delete(vacina);
     }
 
-    private void validarIntervalo(VacinaRequestDTO dto) {
-        if (dto.dosagemUnica()) {
-            if (dto.intervaloUnidade() != null || dto.intervaloQuantidade() != null) {
-                throw new DadosInvalidosException("Dose unica nao pode ter intervalos");
-            }
-            return;
-        }
-        if (dto.intervaloUnidade() == null || dto.intervaloQuantidade() == null) {
-            throw new DadosInvalidosException("Informe a quantidade e a unidade do intervalo");
-        }
-        if (dto.intervaloQuantidade() <= 0) {
-            throw new DadosInvalidosException("A quantidade do intervalo deve ser maior que zero");
-
+    public void validarAtualizacao(Vacina vacina, VacinaRequestDTO dto) {
+        dto.validarRegras();
+        if (vacina.getStatus() == StatusVacina.APLICADA && !dto.jaAplicada()) {
+            throw new DadosInvalidosException("Vacina ja aplicada nao pode voltar a pendente");
         }
     }
+
+
+
     private LocalDate calcularProximaDose(LocalDate base, Integer quantidade, IntervaloUnidade unidade) {
         return switch (unidade) {
             case DIAS -> base.plusDays(quantidade);
@@ -145,10 +130,6 @@ public class VacinaService {
         }
         vacina.setDataProximaDose(null);
     }
-    private void validarDataSeAplicada(VacinaRequestDTO dto){
-        if (dto.jaAplicada() && dto.dataAplicacao().isAfter(LocalDate.now(ZONA))){
-            throw new DadosInvalidosException("Vacina ja aplicada nao pode ter data futura");
-        }
-    }
+
 
 }
