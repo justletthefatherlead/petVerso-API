@@ -23,7 +23,7 @@ public class SolicitacaoAlteracao {
     @Column(nullable = false)
     private TipoAlteracao tipo;
 
-    @Column(nullable = false)
+    @Column
     private Long idAlvo;
 
     @Column(columnDefinition = "TEXT", nullable = false)

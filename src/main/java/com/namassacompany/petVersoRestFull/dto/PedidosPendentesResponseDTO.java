@@ -1,4 +1,8 @@
 package com.namassacompany.petVersoRestFull.dto;
 
-public class PedidosPendentesResponseDTO {
-}
+import java.util.List;
+
+public record PedidosPendentesResponseDTO (
+        List<SolicitacaoResponseDTO> vinculos,
+        List<SolicitarAlteracaoResponseDTO> alteracoes
+){}

@@ -1,6 +1,8 @@
 package com.namassacompany.petVersoRestFull.model;
 
 public enum TipoAlteracao {
-    TAREFA,
-    VACINA
+    ALTERAR_TAREFA,
+    ALTERAR_VACINA,
+    ADICIONAR_VACINA
+
 }
