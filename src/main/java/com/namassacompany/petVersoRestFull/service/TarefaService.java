@@ -81,7 +81,7 @@ public class TarefaService {
         Tarefa tarefa = tarefaRepository.findById(idTarefa).orElseThrow(() -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(tarefa.getPet(), usuario, () -> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
 
-        if (tarefa.isConcluida()) throw new IllegalStateException("Esta tarefa já foi concluida");
+        if (tarefa.isConcluida()) throw new IllegalStateException("Esta tarefa ja foi concluida");
 
         tarefa.setTitulo(dto.titulo());
         tarefa.setDescricao(dto.descricao());
@@ -94,7 +94,7 @@ public class TarefaService {
     public void excluir(Long idTarefa, Usuario usuario){
         Tarefa tarefa =  tarefaRepository.findById(idTarefa).orElseThrow(()-> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
         vinculoAcessoService.buscarVinculoDono(tarefa.getPet(), usuario, ()-> new TarefaNaoEncontradaException("Tarefa nao encontrada"));
-        solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.TAREFA, idTarefa);
+        solicitacaoAlteracaoRepository.deleteByTipoAndIdAlvo(TipoAlteracao.ALTERAR_TAREFA, idTarefa);
         tarefaRepository.delete(tarefa);
 
     }

@@ -95,5 +95,11 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(SolicitacaoNaoEncontradaException.class)
+    public ResponseEntity<String> handleSolicitacaoNaoEncontrada(SolicitacaoNaoEncontradaException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
 
 }

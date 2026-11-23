@@ -1,9 +1,7 @@
 package com.namassacompany.petVersoRestFull.controller;
 
-import com.namassacompany.petVersoRestFull.dto.PedidosPendentesResponseDTO;
-import com.namassacompany.petVersoRestFull.dto.SolicitarAlteracaoResponseDTO;
-import com.namassacompany.petVersoRestFull.dto.TarefaRequestDTO;
-import com.namassacompany.petVersoRestFull.dto.VacinaRequestDTO;
+import com.namassacompany.petVersoRestFull.dto.*;
+import com.namassacompany.petVersoRestFull.model.SolicitacaoAlteracao;
 import com.namassacompany.petVersoRestFull.model.Usuario;
 import com.namassacompany.petVersoRestFull.service.PedidosPendentesService;
 import com.namassacompany.petVersoRestFull.service.SolicitacaoAlteracaoService;
@@ -50,6 +48,20 @@ public class SolicitacaoController {
                                                                                   @Valid @RequestBody VacinaRequestDTO dados,
                                                                                   @AuthenticationPrincipal Usuario usuario){
         return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoAlteracaoService.solicitarAlteracaoVacina(idVacina,dados,usuario));
+    }
+    @PatchMapping("/{idSolicitacao}/recusar")
+    public ResponseEntity<SolicitarAlteracaoResponseDTO> recusarSolicitacao(@PathVariable Long idSolicitacao,
+                                                                            @Valid @RequestBody(required = false) RecusarSolicitacaoResponseDTO body,
+                                                                            @AuthenticationPrincipal Usuario dono){
+        String motivo = (body == null)? null : body.motivo();
+
+        return ResponseEntity.ok(solicitacaoAlteracaoService.recusarSolicitacao(idSolicitacao,motivo,dono));
+    }
+
+    @PatchMapping("/{idSolicitacao}/aprovar")
+    public ResponseEntity<SolicitarAlteracaoResponseDTO> aprovarSolicitacao(@PathVariable Long idSolicitacao,
+                                                                            @AuthenticationPrincipal Usuario usuario){
+        return ResponseEntity.ok(solicitacaoAlteracaoService.aprovarSolicitacao(idSolicitacao,usuario));
     }
 
 }

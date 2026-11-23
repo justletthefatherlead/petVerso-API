@@ -24,14 +24,16 @@ public class PetService {
     private final TarefaRepository tarefaRepository;
     private final VacinaRepository vacinaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final SolicitacaoAlteracaoRepository solicitacaoAlteracaoRepository;
 
-    public PetService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository, VinculoAcessoService vinculoAcessoService, TarefaRepository tarefaRepository, VacinaRepository vacinaRepository, UsuarioRepository usuarioRepository) {
+    public PetService(PetRepository petRepository, VinculoPetRepository vinculoPetRepository, VinculoAcessoService vinculoAcessoService, TarefaRepository tarefaRepository, VacinaRepository vacinaRepository, UsuarioRepository usuarioRepository, SolicitacaoAlteracaoRepository solicitacaoAlteracaoRepository) {
         this.petRepository = petRepository;
         this.vinculoPetRepository = vinculoPetRepository;
         this.vinculoAcessoService = vinculoAcessoService;
         this.tarefaRepository = tarefaRepository;
         this.vacinaRepository = vacinaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.solicitacaoAlteracaoRepository = solicitacaoAlteracaoRepository;
     }
 
     @Transactional
@@ -263,6 +265,7 @@ public class PetService {
         vinculoAcessoService.buscarVinculoDono(pet, usuario, ()-> new PetNaoEncontradoException("Pet nao encontrado"));
         tarefaRepository.deleteByPet(pet);
         vacinaRepository.deleteByPet(pet);
+        solicitacaoAlteracaoRepository.deleteByPet(pet);
         vinculoPetRepository.deleteByPet(pet);
         petRepository.delete(pet);
     }
@@ -278,6 +281,7 @@ public class PetService {
 
         VinculoPet vinculo = vinculoAcessoService.buscarVinculoAceito(pet, usuarioAlvo,()->new TutorNaoEncontradoException("Tutor nao encontrado"));
         vinculoPetRepository.delete(vinculo);
+        solicitacaoAlteracaoRepository.cancelarPendentes(pet, usuario);
 
     }
     @Transactional
@@ -288,6 +292,7 @@ public class PetService {
             throw new AcessoNegadoException("Voce nao tem permissao para remover seu vinculo, voce pode remover outro tutor ou deletar os dados de um pet cadastrado");
         }
         vinculoPetRepository.delete(vinculo);
+        solicitacaoAlteracaoRepository.cancelarPendentes(pet, usuario);
 
     }
 

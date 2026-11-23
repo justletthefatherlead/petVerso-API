@@ -1,7 +1,9 @@
 package com.namassacompany.petVersoRestFull.repository;
 
 import com.namassacompany.petVersoRestFull.model.*;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -54,5 +56,9 @@ public interface SolicitacaoAlteracaoRepository extends JpaRepository<Solicitaca
     default List<SolicitacaoAlteracao> listarPendentesDoDono(Usuario usuario){
         return listarPendentesDoDono(usuario, Papel.DONO,StatusDeVinculo.ACEITO, StatusSolicitacao.PENDENTE);
         }
+
+        @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("select s from SolicitacaoAlteracao s where s.idSolicitacao = :id")
+        Optional<SolicitacaoAlteracao> buscarParaResponder(@Param("id") Long id);
 
 }
