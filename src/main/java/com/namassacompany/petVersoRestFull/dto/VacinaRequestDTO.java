@@ -42,12 +42,12 @@ public record VacinaRequestDTO(
 
                 }
         }
-        private void validarDataSeAplicada(){
+        private void validarDataSeAplicada() {
                 if (!jaAplicada()) {
                         return;
                 }
-                if (jaAplicada() && dataAplicacao().isAfter(LocalDate.now(ZONA))){
-                        throw new DadosInvalidosException("Vacina ja aplicada nao pode ter data futura");
+                if (dataAplicacao() == null) {
+                        throw new DadosInvalidosException("Informe a data de aplicacao da vacina");
                 }
                 if (dataAplicacao().isAfter(LocalDate.now(ZONA))) {
                         throw new DadosInvalidosException("Vacina ja aplicada nao pode ter data futura");

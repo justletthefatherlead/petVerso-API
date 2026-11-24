@@ -245,7 +245,7 @@ public class PetService {
         return vinculos.stream().map(TutorResponseDTO::new).toList();
 
     }
-
+    @Transactional
     public PetResponseDTO alterarDados(Long idPet, PetRequestDTO dto, Usuario usuario){
         Pet pet = petRepository.findById(idPet).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
         vinculoAcessoService.buscarVinculoAceito(pet, usuario,()-> new PetNaoEncontradoException("Pet nao econtrado"));
@@ -281,7 +281,7 @@ public class PetService {
 
         VinculoPet vinculo = vinculoAcessoService.buscarVinculoAceito(pet, usuarioAlvo,()->new TutorNaoEncontradoException("Tutor nao encontrado"));
         vinculoPetRepository.delete(vinculo);
-        solicitacaoAlteracaoRepository.cancelarPendentes(pet, usuario);
+        solicitacaoAlteracaoRepository.cancelarPendentes(pet, usuarioAlvo);
 
     }
     @Transactional
