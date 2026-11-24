@@ -248,7 +248,7 @@ public class PetService {
     @Transactional
     public PetResponseDTO alterarDados(Long idPet, PetRequestDTO dto, Usuario usuario){
         Pet pet = petRepository.findById(idPet).orElseThrow(()-> new PetNaoEncontradoException("Pet nao encontrado"));
-        vinculoAcessoService.buscarVinculoAceito(pet, usuario,()-> new PetNaoEncontradoException("Pet nao econtrado"));
+        vinculoAcessoService.buscarVinculoAceito(pet, usuario,()-> new PetNaoEncontradoException("Pet nao encotrado"));
         pet.setNome(dto.nome());
         pet.setRaca(dto.raca());
         pet.setEspecie(dto.especie());
